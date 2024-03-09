@@ -12,7 +12,7 @@ import (
 func main() {
 	conf, err := config.GetConfig()
 	if err != nil {
-		log.Fatalf("Config error: %s", err)
+		log.Printf("Config error: %s", err)
 	}
 
 	app.Run(conf)
