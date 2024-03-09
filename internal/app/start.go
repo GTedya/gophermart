@@ -14,7 +14,7 @@ func Run(conf config.Config) {
 
 	db, err := repository.NewDB(conf.DatabaseURI)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 
 	migrator, err := database.MustGetNewMigrator()
@@ -36,5 +36,5 @@ func Run(conf config.Config) {
 
 	e := NewRouter(log, db, []byte(conf.SecretKey))
 
-	log.Fatal(http.ListenAndServe(conf.RunAddress, e))
+	log.Fatal(http.ListenAndServe("localhost:8080", e))
 }
