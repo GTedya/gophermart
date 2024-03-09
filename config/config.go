@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"os"
 )
 
 type Config struct {
@@ -32,5 +33,22 @@ func GetConfig() (c Config, err error) {
 		return c, fmt.Errorf("viper unmarshalling error: %w", err)
 	}
 
+	getFromEnviroment(&c)
+
 	return c, nil
+}
+
+func getFromEnviroment(c *Config) {
+	address, exists := os.LookupEnv("RUN_ADDRESS")
+	if exists {
+		c.RunAddress = address
+	}
+	db, exists := os.LookupEnv("DATABASE_URI")
+	if exists {
+		c.DatabaseURI = db
+	}
+	accrual, exists := os.LookupEnv("ACCRUAL_SYSTEM_ADDRESS")
+	if exists {
+		c.AccrualSystemAddress = accrual
+	}
 }
