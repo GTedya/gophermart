@@ -94,6 +94,10 @@ func (u *userRepo) Withdraw(ctx context.Context, writeOff domain.WriteOff) error
 		return ErrInsufficientFunds
 	}
 	tx, err := u.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("transaction start error: %w", err)
+	}
+
 	_, err = tx.ExecContext(ctx, "INSERT INTO write_off_history (order_id, user_id, withdrawn) values ($1, $2, $3)",
 		writeOff.OrderID, writeOff.UserID, writeOff.Withdrawn)
 	if err != nil {

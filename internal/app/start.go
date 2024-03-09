@@ -12,7 +12,7 @@ import (
 func Run(conf config.Config) {
 	log := logger.GetLogger()
 
-	db, err := repository.NewDB(conf.DatabaseUri)
+	db, err := repository.NewDB(conf.DatabaseURI)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -126,6 +126,9 @@ func (h *handler) UserBalance(c echo.Context) error {
 	}
 	repo := repository.NewUserRepo(h.db, &domain.User{ID: userID}, h.log)
 	balance.Current, balance.Withdrawn, err = repo.UserBalance(ctx)
+	if err != nil {
+		h.log.Errorf("user balance getting error: %w", err)
+	}
 
 	return c.JSON(http.StatusOK, balance)
 }

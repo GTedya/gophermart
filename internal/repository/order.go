@@ -56,6 +56,12 @@ func (r *orderRepo) GetUserOrders(ctx context.Context) ([]domain.Accrual, error)
 	var userOrders []domain.Accrual
 	var accrual sql.NullFloat64
 	rows, err := r.DB.QueryContext(ctx, "SELECT order_id, uploaded_at, accrual, status FROM order_accruals where user_id = $1 ORDER BY uploaded_at DESC ", r.order.UserID)
+	defer func() {
+		er := rows.Close()
+		if er != nil {
+			r.log.Error(er)
+		}
+	}()
 	if err != nil {
 		return nil, fmt.Errorf("query executing error: %w", err)
 	}
@@ -72,6 +78,9 @@ func (r *orderRepo) GetUserOrders(ctx context.Context) ([]domain.Accrual, error)
 		order.UploadedAt = carbon.Parse(uploadedAt.String()).ToRfc3339String()
 
 		userOrders = append(userOrders, order)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
 	}
 
 	return userOrders, nil
