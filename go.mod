@@ -1,6 +1,6 @@
 module github.com/GTedya/gophermart
 
-go 1.22.0
+go 1.21.8
 
 require (
 	github.com/go-playground/validator/v10 v10.18.0
