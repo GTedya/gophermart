@@ -1,0 +1,5 @@
+START TRANSACTION;
+
+DROP TABLE IF EXISTS write_off_history;
+
+COMMIT
