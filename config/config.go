@@ -1,9 +1,7 @@
 package config
 
 import (
-	"fmt"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 	"os"
 )
 
@@ -22,33 +20,19 @@ func GetConfig() (c Config, err error) {
 	pflag.StringVar(&c.SecretKey, "s", "some_key", "secret key")
 	pflag.Parse()
 
-	viper.SetConfigFile(".env")
-	err = viper.ReadInConfig()
-	if err != nil {
-		return c, fmt.Errorf("viper reading error: %w", err)
-	}
-
-	err = viper.Unmarshal(&c)
-	if err != nil {
-		return c, fmt.Errorf("viper unmarshalling error: %w", err)
-	}
-
 	getFromEnvironment(&c)
 
 	return c, nil
 }
 
 func getFromEnvironment(c *Config) {
-	address, exists := os.LookupEnv("RUN_ADDRESS")
-	if exists {
+	if address := os.Getenv("RUN_ADDRESS"); address != "" {
 		c.RunAddress = address
 	}
-	db, exists := os.LookupEnv("DATABASE_URI")
-	if exists {
+	if db := os.Getenv("DATABASE_URI"); db != "" {
 		c.DatabaseURI = db
 	}
-	accrual, exists := os.LookupEnv("ACCRUAL_SYSTEM_ADDRESS")
-	if exists {
+	if accrual := os.Getenv("ACCRUAL_SYSTEM_ADDRESS"); accrual != "" {
 		c.AccrualSystemAddress = accrual
 	}
 }
