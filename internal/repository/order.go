@@ -35,7 +35,7 @@ type OrderRepo interface {
 func (r *orderRepo) CreateOrder(ctx context.Context) error {
 	var existingUserID int64
 	query := "SELECT user_id FROM order_accruals WHERE order_id = $1"
-	err := r.DB.QueryRowContext(ctx, query, r.order.ID).Scan(&existingUserID)
+	err := r.DB.QueryRowContext(ctx, query, r.order.OrderID).Scan(&existingUserID)
 	if err == nil {
 		if existingUserID == r.order.UserID {
 			return ErrExistingOrderThisUser

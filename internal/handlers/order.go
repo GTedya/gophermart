@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/theplant/luhn"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -32,12 +33,18 @@ func (h *handler) OrderLoading(c echo.Context) error {
 		}
 		return c.NoContent(500)
 	}
-	err = c.Bind(&order)
+	b, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		h.log.Error("binding error: ", err)
-		return c.NoContent(400)
+		h.log.Info("body reading error: ", err)
+		return c.NoContent(500)
 	}
-	if !luhn.Valid(int(order.ID)) {
+	order.OrderID = string(b)
+	check, err := strconv.Atoi(order.OrderID)
+	if err != nil {
+		h.log.Info("string conversation error: ", err)
+		return c.NoContent(500)
+	}
+	if !luhn.Valid(check) {
 		return c.NoContent(http.StatusUnprocessableEntity)
 	}
 	order.UserID = userID
@@ -92,12 +99,8 @@ func (h *handler) PointsCalculation(c echo.Context) error {
 	ctx := context.Background()
 
 	calculation.Order = c.Param("number")
-	orderID, err := strconv.ParseInt(calculation.Order, 10, 64)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
 
-	orderRepo := repository.NewOrderRepo(h.db, &domain.Accrual{OrderID: orderID}, h.log)
+	orderRepo := repository.NewOrderRepo(h.db, &domain.Accrual{OrderID: calculation.Order}, h.log)
 	accrual, err := orderRepo.GetAccrual(ctx)
 	if errors.Is(err, sql.ErrNoRows) {
 		return c.String(http.StatusUnauthorized, "Проверьте корректность ввода данных")

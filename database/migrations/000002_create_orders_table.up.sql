@@ -5,7 +5,7 @@ CREATE TYPE order_status AS ENUM ('NEW','PROCESSED' ,'PROCESSING', 'INVALID', 'P
 CREATE TABLE IF NOT EXISTS order_accruals
 (
     id          SERIAL PRIMARY KEY,
-    order_id    BIGINT,
+    order_id    VARCHAR(50),
     user_id     INT,
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     status      order_status DEFAULT 'NEW',
