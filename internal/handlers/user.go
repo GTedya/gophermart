@@ -12,6 +12,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/theplant/luhn"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -153,7 +154,12 @@ func (h *handler) Withdraw(c echo.Context) error {
 		h.log.Errorf("binding error: %w", err)
 		return c.String(http.StatusInternalServerError, "bad request")
 	}
-	if !luhn.Valid(int(cancellation.OrderID)) {
+	check, err := strconv.Atoi(cancellation.OrderID)
+	if err != nil {
+		h.log.Info("string conversation error: ", err)
+		return c.NoContent(500)
+	}
+	if !luhn.Valid(check) {
 		return c.NoContent(http.StatusUnprocessableEntity)
 	}
 
