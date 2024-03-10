@@ -69,7 +69,7 @@ func (h *handler) UserRegister(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	c.Response().Writer.Header().Add("Authorization", tok)
+	c.Response().Writer.Header().Add("Authorization", "Bearer "+tok)
 
 	return c.NoContent(http.StatusOK)
 }
@@ -106,7 +106,7 @@ func (h *handler) UserLogin(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	c.Response().Writer.Header().Add("Authorization", tok)
+	c.Response().Writer.Header().Add("Authorization", "Bearer "+tok)
 
 	return c.NoContent(http.StatusOK)
 }
