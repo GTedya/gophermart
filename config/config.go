@@ -33,12 +33,12 @@ func GetConfig() (c Config, err error) {
 		return c, fmt.Errorf("viper unmarshalling error: %w", err)
 	}
 
-	getFromEnviroment(&c)
+	getFromEnvironment(&c)
 
 	return c, nil
 }
 
-func getFromEnviroment(c *Config) {
+func getFromEnvironment(c *Config) {
 	address, exists := os.LookupEnv("RUN_ADDRESS")
 	if exists {
 		c.RunAddress = address

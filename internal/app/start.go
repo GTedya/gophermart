@@ -30,7 +30,7 @@ func Run(conf config.Config) {
 	defer func(db *sql.DB) {
 		er := db.Close()
 		if er != nil {
-			log.Fatal("got error when closing the DB connection: ", err)
+			log.Error("got error when closing the DB connection: ", err)
 		}
 	}(db)
 
