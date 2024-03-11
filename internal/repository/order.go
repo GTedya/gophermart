@@ -99,7 +99,7 @@ func (r *orderRepo) GetAccrual(ctx context.Context) (order domain.Accrual, err e
 
 func (r *orderRepo) GetOrders(ctx context.Context) ([]domain.Accrual, error) {
 	var userOrders []domain.Accrual
-	rows, err := r.DB.QueryContext(ctx, "SELECT id,order_id,status FROM order_accruals WHERE status !='PROCESSED' AND status != 'INVALID' ORDER BY uploaded_at ", r.order.UserID)
+	rows, err := r.DB.QueryContext(ctx, "SELECT id,order_id,status FROM order_accruals WHERE status !='PROCESSED' AND status != 'INVALID' ORDER BY uploaded_at ")
 	defer func() {
 		er := rows.Close()
 		if er != nil {
