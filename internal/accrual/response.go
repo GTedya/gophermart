@@ -59,7 +59,7 @@ func (o *orderResponse) GetPointsByOrder(url string) (*orderResponse, error) {
 
 		if resp.StatusCode != http.StatusOK {
 			if resp.StatusCode == http.StatusNoContent {
-				return nil, ErrNotFound
+				return nil, fmt.Errorf("something wents wrong: %w in url: %s", ErrNotFound, url)
 			}
 			o.log.Debug("сервер вернул статус-код: %d, url: %s", resp.StatusCode, url)
 			return nil, ErrStatusCode

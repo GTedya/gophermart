@@ -88,4 +88,5 @@ func (p planner) orderProcessed(ctx context.Context, order *domain.Accrual) {
 		p.log.Errorw("не удалось обновить заказ", err)
 		return
 	}
+	p.log.Debug("Статусы записей успешно обновлены")
 }
