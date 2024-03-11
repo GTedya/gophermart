@@ -3,7 +3,6 @@ package app
 import (
 	"database/sql"
 	"github.com/GTedya/gophermart/internal/handlers"
-	"github.com/GTedya/gophermart/internal/middlewares"
 	"github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -18,7 +17,6 @@ type Handler interface {
 	UserOrders(c echo.Context) error
 	UserBalance(e echo.Context) error
 	Withdraw(c echo.Context) error
-	PointsCalculation(c echo.Context) error
 }
 
 type Router interface {
@@ -33,14 +31,12 @@ func NewRouter(log *zap.SugaredLogger, db *sql.DB, secretKey []byte) Router {
 	c.Use(middleware.Decompress())
 	c.Use(middleware.Gzip())
 	c.Use(middleware.Recover())
-	middle := middlewares.NewMiddleware(log)
-	initRoutes(c, h, secretKey, middle)
+	initRoutes(c, h, secretKey)
 
 	return c
 }
 
-func initRoutes(c *echo.Echo, h Handler, secretKey []byte, middle middlewares.Middleware) {
-
+func initRoutes(c *echo.Echo, h Handler, secretKey []byte) {
 	auth := c.Group("api/user")
 	auth.Use(echojwt.JWT(secretKey))
 	auth.POST("/orders", h.OrderLoading)
@@ -50,5 +46,4 @@ func initRoutes(c *echo.Echo, h Handler, secretKey []byte, middle middlewares.Mi
 
 	c.POST("/api/user/register", h.UserRegister)
 	c.POST("/api/user/login", h.UserLogin)
-	c.GET("/api/orders/:number", h.PointsCalculation, middle.IPRateLimit())
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"github.com/GTedya/gophermart/domain"
 	"github.com/GTedya/gophermart/internal/repository"
@@ -13,12 +12,6 @@ import (
 	"net/http"
 	"strconv"
 )
-
-type pointCalculation struct {
-	Order   string  `json:"order"`
-	Status  string  `json:"status"`
-	Accrual float64 `json:"accrual"`
-}
 
 func (h *handler) OrderLoading(c echo.Context) error {
 	var order domain.Accrual
@@ -92,25 +85,4 @@ func (h *handler) UserOrders(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, userOrders)
-}
-
-func (h *handler) PointsCalculation(c echo.Context) error {
-	var calculation pointCalculation
-	ctx := context.Background()
-
-	calculation.Order = c.Param("number")
-
-	orderRepo := repository.NewOrderRepo(h.db, &domain.Accrual{OrderID: calculation.Order}, h.log)
-	accrual, err := orderRepo.GetAccrual(ctx)
-	if errors.Is(err, sql.ErrNoRows) {
-		return c.String(http.StatusUnauthorized, "Проверьте корректность ввода данных")
-	}
-	if err != nil {
-		h.log.Errorf("user getting error: %w", err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	calculation.Accrual = accrual.Accrual
-	calculation.Status = accrual.Status
-
-	return c.JSON(http.StatusOK, calculation)
 }

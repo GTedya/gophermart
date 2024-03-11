@@ -30,6 +30,8 @@ type OrderRepo interface {
 	CreateOrder(ctx context.Context) error
 	GetUserOrders(ctx context.Context) ([]domain.Accrual, error)
 	GetAccrual(ctx context.Context) (order domain.Accrual, err error)
+	GetOrders(ctx context.Context) ([]domain.Accrual, error)
+	UpdateAccrual(ctx context.Context) error
 }
 
 func (r *orderRepo) CreateOrder(ctx context.Context) error {
@@ -93,4 +95,42 @@ func (r *orderRepo) GetAccrual(ctx context.Context) (order domain.Accrual, err e
 		return order, fmt.Errorf("status getting error: %w", err)
 	}
 	return order, nil
+}
+
+func (r *orderRepo) GetOrders(ctx context.Context) ([]domain.Accrual, error) {
+	var userOrders []domain.Accrual
+	rows, err := r.DB.QueryContext(ctx, "SELECT id,order_id,status FROM order_accruals WHERE status !='PROCESSED' AND status != 'INVALID' ORDER BY uploaded_at ", r.order.UserID)
+	defer func() {
+		er := rows.Close()
+		if er != nil {
+			r.log.Error(er)
+		}
+	}()
+	if err != nil {
+		return nil, fmt.Errorf("query executing error: %w", err)
+	}
+	for rows.Next() {
+		var order domain.Accrual
+
+		if err = rows.Scan(&order.ID, &order.OrderID, &order.Status); err != nil {
+			return nil, fmt.Errorf("rows scan error: %w", err)
+		}
+
+		userOrders = append(userOrders, order)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return userOrders, nil
+}
+
+func (r *orderRepo) UpdateAccrual(ctx context.Context) error {
+	insertQuery := "UPDATE order_accruals SET accrual = $1, status = 'PROCESSED' WHERE order_id = $2"
+	_, err := r.DB.ExecContext(ctx, insertQuery, r.order.Accrual, r.order.OrderID)
+	if err != nil {
+		return fmt.Errorf("failed to update order: %w", err)
+	}
+
+	return nil
 }
