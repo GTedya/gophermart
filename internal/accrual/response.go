@@ -38,12 +38,12 @@ func (o *orderResponse) GetPointsByOrder(url string) (*orderResponse, error) {
 		if err != nil {
 			return nil, fmt.Errorf("request to loyalty: %w", err)
 		}
-		defer func(Body io.ReadCloser) {
-			er := Body.Close()
+		defer func() {
+			er := resp.Body.Close()
 			if er != nil {
 				o.log.Errorf("Body closing error: %w", err)
 			}
-		}(resp.Body)
+		}()
 		if resp.StatusCode == http.StatusTooManyRequests {
 			retryAfter := resp.Header.Get("Retry-After")
 			delaySeconds, err := strconv.Atoi(retryAfter)
