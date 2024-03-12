@@ -67,15 +67,13 @@ func (p planner) startProcessed(ctx context.Context, orders []domain.Accrual) {
 
 func (p planner) orderProcessed(ctx context.Context, order *domain.Accrual) {
 	loyalty := accrual.NewLoyalty(p.log, order.OrderID, &order.Accrual)
-	orderResp, err := loyalty.GetPointsByOrder(fmt.Sprintf("%s/api/orders/%s", p.cfg.AccrualSystemAddress, order.OrderID))
+	url := fmt.Sprintf("%s/api/orders/%s", p.cfg.AccrualSystemAddress, order.OrderID)
+	err := loyalty.GetPointsByOrder(url, order)
 	if err != nil {
 		p.log.Errorw("не удалось получить данные по заказу", err)
 		return
 	}
-	if *orderResp.Accrual == 0 {
-		return
-	}
-	order.Accrual = *orderResp.Accrual
+
 	orderRepo := repository.NewOrderRepo(p.db, order, p.log)
 
 	errDB := orderRepo.UpdateAccrual(ctx)

@@ -126,8 +126,8 @@ func (r *orderRepo) GetOrdersWithValidStatus(ctx context.Context) ([]domain.Accr
 }
 
 func (r *orderRepo) UpdateAccrual(ctx context.Context) error {
-	insertQuery := "UPDATE order_accruals SET accrual = $1, status = 'PROCESSED' WHERE order_id = $2"
-	_, err := r.DB.ExecContext(ctx, insertQuery, r.order.Accrual, r.order.OrderID)
+	insertQuery := "UPDATE order_accruals SET accrual = $1, status = $2 WHERE order_id = $3"
+	_, err := r.DB.ExecContext(ctx, insertQuery, r.order.Accrual, r.order.Status, r.order.OrderID)
 	if err != nil {
 		return fmt.Errorf("failed to update order: %w", err)
 	}
