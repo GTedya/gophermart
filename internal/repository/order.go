@@ -30,7 +30,7 @@ type OrderRepo interface {
 	CreateOrder(ctx context.Context) error
 	GetUserOrders(ctx context.Context) ([]domain.Accrual, error)
 	GetAccrual(ctx context.Context) (order domain.Accrual, err error)
-	GetOrders(ctx context.Context) ([]domain.Accrual, error)
+	GetOrdersWithValidStatus(ctx context.Context) ([]domain.Accrual, error)
 	UpdateAccrual(ctx context.Context) error
 }
 
@@ -97,7 +97,7 @@ func (r *orderRepo) GetAccrual(ctx context.Context) (order domain.Accrual, err e
 	return order, nil
 }
 
-func (r *orderRepo) GetOrders(ctx context.Context) ([]domain.Accrual, error) {
+func (r *orderRepo) GetOrdersWithValidStatus(ctx context.Context) ([]domain.Accrual, error) {
 	var userOrders []domain.Accrual
 	rows, err := r.DB.QueryContext(ctx, "SELECT id,order_id,status FROM order_accruals WHERE status !='PROCESSED' AND status != 'INVALID' ORDER BY uploaded_at ")
 	defer func() {

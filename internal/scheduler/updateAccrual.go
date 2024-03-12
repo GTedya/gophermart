@@ -10,7 +10,6 @@ import (
 	"github.com/GTedya/gophermart/internal/repository"
 	"github.com/labstack/gommon/log"
 	"go.uber.org/zap"
-	"sync"
 	"time"
 )
 
@@ -20,15 +19,13 @@ type planner struct {
 	log *zap.SugaredLogger
 	db  *sql.DB
 	cfg config.Config
-	wg  *sync.WaitGroup
 }
 
-func NewPlanner(log *zap.SugaredLogger, db *sql.DB, cfg config.Config, wg *sync.WaitGroup) Planner {
+func NewPlanner(log *zap.SugaredLogger, db *sql.DB, cfg config.Config) Planner {
 	return planner{
 		log: log,
 		db:  db,
 		cfg: cfg,
-		wg:  wg,
 	}
 }
 
@@ -37,8 +34,6 @@ type Planner interface {
 }
 
 func (p planner) UpdateAccrual(ctx context.Context) {
-	defer p.wg.Done()
-
 	ticker := time.NewTicker(StatusFresh)
 	defer ticker.Stop()
 
@@ -46,7 +41,7 @@ func (p planner) UpdateAccrual(ctx context.Context) {
 		select {
 		case <-ticker.C:
 			orderRepo := repository.NewOrderRepo(p.db, nil, p.log)
-			orders, err := orderRepo.GetOrders(ctx)
+			orders, err := orderRepo.GetOrdersWithValidStatus(ctx)
 			if err != nil {
 				log.Error("Status updating error", err)
 			}

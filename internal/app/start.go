@@ -9,7 +9,6 @@ import (
 	"github.com/GTedya/gophermart/internal/repository"
 	"github.com/GTedya/gophermart/internal/scheduler"
 	"net/http"
-	"sync"
 )
 
 func Run(conf config.Config) {
@@ -38,9 +37,7 @@ func Run(conf config.Config) {
 		}
 	}(db)
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	planner := scheduler.NewPlanner(log, db, conf, &wg)
+	planner := scheduler.NewPlanner(log, db, conf)
 	go planner.UpdateAccrual(ctx)
 
 	e := NewRouter(log, db, []byte(conf.SecretKey))
