@@ -17,6 +17,7 @@ type Handler interface {
 	UserOrders(c echo.Context) error
 	UserBalance(e echo.Context) error
 	Withdraw(c echo.Context) error
+	WithdrawHistory(c echo.Context) error
 }
 
 type Router interface {
@@ -42,6 +43,7 @@ func initRoutes(c *echo.Echo, h Handler, secretKey []byte) {
 	auth.POST("/orders", h.OrderLoading)
 	auth.POST("/balance/withdraw", h.Withdraw)
 	auth.GET("/orders", h.UserOrders)
+	auth.GET("/withdrawals", h.WithdrawHistory)
 	auth.GET("/balance", h.UserBalance)
 
 	c.POST("/api/user/register", h.UserRegister)

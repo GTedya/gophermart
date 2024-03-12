@@ -177,3 +177,28 @@ func (h *handler) Withdraw(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+func (h *handler) WithdrawHistory(c echo.Context) error {
+	ctx := context.Background()
+
+	bearerToken := c.Request().Header.Get("Authorization")
+	userID, err := getIDFromToken(bearerToken, h.secretKey)
+	if err != nil {
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
+			h.log.Error("jwt signature error: ", err)
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		h.log.Error("jwt parsing error: ", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	repo := repository.NewUserRepo(h.db, &domain.User{ID: userID}, h.log)
+	hist, err := repo.WithdrawHistory(ctx)
+	if err != nil {
+		h.log.Error("user withdrawals history error ", err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	if len(hist) == 0 {
+		return c.NoContent(http.StatusNoContent)
+	}
+	return c.JSON(http.StatusOK, hist)
+}

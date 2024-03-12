@@ -7,3 +7,9 @@ type WriteOff struct {
 	UserID     int64   `json:"-"`
 	UploadedAt string  `json:"uploaded_at"`
 }
+
+type WithdrawnHistory struct {
+	OrderID   string  `json:"order"`
+	Withdrawn float64 `json:"sum"`
+	Processed string  `json:"processed_at"`
+}

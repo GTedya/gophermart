@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/GTedya/gophermart/domain"
+	"github.com/golang-module/carbon/v2"
 	"go.uber.org/zap"
+	"time"
 )
 
 type userRepo struct {
@@ -26,6 +28,7 @@ type UserRepo interface {
 	GetUser(ctx context.Context) (user domain.User, err error)
 	UserBalance(ctx context.Context) (current float64, withdrawn float64, err error)
 	Withdraw(ctx context.Context, writeOff domain.WriteOff) error
+	WithdrawHistory(ctx context.Context) ([]domain.WithdrawnHistory, error)
 }
 
 func (u *userRepo) RegisterUser(ctx context.Context) (int64, error) {
@@ -115,4 +118,35 @@ func (u *userRepo) Withdraw(ctx context.Context, writeOff domain.WriteOff) error
 		}
 	}()
 	return nil
+}
+
+func (u *userRepo) WithdrawHistory(ctx context.Context) ([]domain.WithdrawnHistory, error) {
+	var userWithdrawals []domain.WithdrawnHistory
+	rows, err := u.DB.QueryContext(ctx, "SELECT order_id, uploaded_at,withdrawn FROM write_off_history where user_id = $1 ORDER BY uploaded_at DESC ", u.user.ID)
+
+	defer func() {
+		er := rows.Close()
+		if er != nil {
+			u.log.Error(er)
+		}
+	}()
+	if err != nil {
+		return nil, fmt.Errorf("query executing error: %w", err)
+	}
+	for rows.Next() {
+		var order domain.WithdrawnHistory
+		var uploadedAt time.Time
+
+		if err = rows.Scan(&order.OrderID, &uploadedAt, &order.Withdrawn); err != nil {
+			return nil, fmt.Errorf("rows scan error: %w", err)
+		}
+		order.Processed = carbon.Parse(uploadedAt.String()).ToRfc3339String()
+
+		userWithdrawals = append(userWithdrawals, order)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return userWithdrawals, nil
 }

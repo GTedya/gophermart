@@ -13,6 +13,7 @@ type Handler interface {
 	UserOrders(c echo.Context) error
 	UserBalance(e echo.Context) error
 	Withdraw(c echo.Context) error
+	WithdrawHistory(c echo.Context) error
 }
 
 type handler struct {
