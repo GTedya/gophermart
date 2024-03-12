@@ -13,17 +13,17 @@ import (
 
 type orderResponse struct {
 	log     *zap.SugaredLogger
-	OrderID string   `json:"order"`
-	Accrual *float64 `json:"accrual,omitempty"`
-	Status  string   `json:"status"`
+	OrderID string  `json:"order"`
+	Accrual float64 `json:"accrual,omitempty"`
+	Status  string  `json:"status"`
 }
 
 type LoyaltyResponse interface {
 	GetPointsByOrder(url string, order *domain.Accrual) error
 }
 
-func NewLoyalty(log *zap.SugaredLogger, orderID string, accrual *float64) LoyaltyResponse {
-	return &orderResponse{OrderID: orderID, log: log, Accrual: accrual}
+func NewLoyalty(log *zap.SugaredLogger, orderID string) LoyaltyResponse {
+	return &orderResponse{OrderID: orderID, log: log}
 }
 
 func (o *orderResponse) GetPointsByOrder(url string, order *domain.Accrual) error {
@@ -67,8 +67,8 @@ func (o *orderResponse) GetPointsByOrder(url string, order *domain.Accrual) erro
 			return fmt.Errorf("json unmarshalling error: %w", err)
 		}
 		order.Status = orderResp.Status
-		if order.Accrual != 0 {
-			order.Accrual = *orderResp.Accrual
+		if orderResp.Accrual != 0 {
+			order.Accrual = orderResp.Accrual
 		}
 
 		return nil

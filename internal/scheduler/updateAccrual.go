@@ -66,7 +66,7 @@ func (p planner) startProcessed(ctx context.Context, orders []domain.Accrual) {
 }
 
 func (p planner) orderProcessed(ctx context.Context, order *domain.Accrual) {
-	loyalty := accrual.NewLoyalty(p.log, order.OrderID, &order.Accrual)
+	loyalty := accrual.NewLoyalty(p.log, order.OrderID)
 	url := fmt.Sprintf("%s/api/orders/%s", p.cfg.AccrualSystemAddress, order.OrderID)
 	err := loyalty.GetPointsByOrder(url, order)
 	if err != nil {
